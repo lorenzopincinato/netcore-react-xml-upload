@@ -12,32 +12,15 @@ namespace api.Controllers
     public class FilesController : ControllerBase
     {
         [HttpPost("uploadFile")]
-        public async Task<IActionResult> UploadFile(IFormFile file)
+        public async Task<IActionResult> UploadFile(IFormFile filepond)
         {
             var filePath = Path.GetTempFileName();
 
-            if (file.Length > 0)
+            if (filepond.Length > 0)
                 using (var stream = new FileStream(filePath, FileMode.Create))
-                    await file.CopyToAsync(stream);
+                    await filepond.CopyToAsync(stream);
 
             return Ok(new { count = 1, path = filePath });
-        }
-
-        [HttpPost("uploadFiles")]
-        public async Task<IActionResult> UploadFiles(List<IFormFile> files)
-        {
-            long size = files.Sum(f => f.Length);
-
-            var filePath = Path.GetTempFileName();
-
-            foreach (var formFile in files)
-            {
-                if (formFile.Length > 0)
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                        await formFile.CopyToAsync(stream);
-            }
-
-            return Ok(new { count = files.Count, path = filePath });
         }
     }
 }
