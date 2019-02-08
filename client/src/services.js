@@ -6,7 +6,7 @@ const apiUrl = 'http://localhost:5000/api';
         apiUrl + '/xmlContent', { 
             method: 'POST',
             headers: new Headers({
-            'Content-Type': 'text/xml; charset=utf-8',
+            'Content-Type': 'application/xml; charset=utf-8',
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate',
             'Connection': 'Keep-alive',

@@ -15,8 +15,6 @@ class App extends Component {
     const content = fileReader.result;
     const parseErr = parser.validate(content).err;
 
-    console.log(parseErr);
-
     if (parseErr === undefined) {
       postContentToAPI(content).then(() => {
         this.setState({status: 'Success'});

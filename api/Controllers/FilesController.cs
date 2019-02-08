@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,16 +12,10 @@ namespace api.Controllers
     [ApiController]
     public class FilesController : ControllerBase
     {
-        [HttpPost("uploadFile")]
-        public async Task<IActionResult> UploadFile(IFormFile filepond)
+        [HttpPost("xmlContent")]
+        public async Task<IActionResult> UploadFile(XDocument xml)
         {
-            var filePath = Path.GetTempFileName();
-
-            if (filepond.Length > 0)
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                    await filepond.CopyToAsync(stream);
-
-            return Ok(new { count = 1, path = filePath });
+            return Ok(xml);
         }
     }
 }
