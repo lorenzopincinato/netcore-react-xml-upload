@@ -4,7 +4,6 @@ import postContentToAPI from './services'
 
 let fileReader;
 
-
 class App extends Component {
   constructor(props) {
     super(props);
