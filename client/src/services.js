@@ -1,29 +1,33 @@
 const apiUrl = 'http://localhost:5000/api'; 
  
- const postContentToAPI = (content) => {   
-    return new Promise((resolve, reject) => {
-      fetch(
-        apiUrl + '/xmlContent', { 
-            method: 'POST',
-            headers: new Headers({
-            'Content-Type': 'application/xml; charset=utf-8',
-            'Accept': '*/*',
-            'Accept-Encoding': 'gzip, deflate',
-            'Connection': 'Keep-alive',
-            'Content-Length': content.length                
-          }),
-          body: content
-      }).then(response => {
-        if (response.ok) {
-          resolve(response);
-        } else {
-          reject(new Error(response.statusText));
+const postFilesToAPI = (files) => {   
+  return new Promise((resolve, reject) => {
+    fetch(
+      apiUrl + '/xmlFiles', { 
+          method: 'POST',
+          headers: new Headers({
+          'Content-Type': 'application/json;'
+        }),
+        body: JSON.stringify(files)
+    }).then(response => {
+      if (response.ok) {
+        resolve(response);
+      } else {
+        if (response.status === 400) {
+          response.json().then(json => {
+            let invalidFiles = json.map(name => `${name}`).join(', ');
+            reject({message: `Invalid file(s): ${invalidFiles}.`})
+          });
         }
-      }, error => {
-        reject(new Error(error.message));
-      });
+        else {
+          console.log(response);
+          reject({message: response.statusText});
+        }
+      }
+    }, error => {
+      reject(new Error(error.message));
     });
-  };
-  
+  });
+};
 
-  export default postContentToAPI;
+export default postFilesToAPI;
