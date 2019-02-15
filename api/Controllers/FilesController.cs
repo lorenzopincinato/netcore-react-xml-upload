@@ -1,49 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Xml;
-using api.Requests;
+﻿using System.Threading.Tasks;
+using api.Contratcs;
+using api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
-    [Route("api")]
+    [Route("api/[controller]")]
     [ApiController]
     public class FilesController : ControllerBase
     {
-        private const string FILE_PATH = "C:\\Users\\Lorenzo Pincinato\\Desktop\\xml-netcore\\";
+        private IFilesService _service;
 
-        [HttpPost("xmlFiles")]
-        public async Task<IActionResult> XmlFiles(XmlFilesRequest request)
+        public FilesController(IFilesService service)
         {
-            var invalidFilesNames = new List<string>();
-            var validFiles = new Dictionary<string, XmlDocument>();
+            _service = service;
+        }
 
-            foreach (XmlFile xmlFileRequest in request)
-            {
-                try
-                {
-                    var xmlFile = new XmlDocument();
-                    xmlFile.LoadXml(xmlFileRequest.Content);
-
-                    validFiles.Add(xmlFileRequest.Name, xmlFile);
-                } catch
-                {
-                    invalidFilesNames.Add(xmlFileRequest.Name);
-                }
-            }
-
-            if (invalidFilesNames.Count == 0)
-            {
-                foreach (var file in validFiles)
-                {
-                    file.Value.Save($"{FILE_PATH}{file.Key}");
-                }
-
-                return Ok();
-            }
-
-            return BadRequest(invalidFilesNames);
+        [HttpPost]
+        public async Task<IActionResult> Post(XmlFileRequest request)
+        {
+            return _service.CreateFile(request.Name, request.Content);
         }
     }
 }

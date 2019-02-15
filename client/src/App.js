@@ -1,30 +1,30 @@
 import React, { Component } from 'react';
 import parser from 'fast-xml-parser';
-import postFilesToAPI from './services'
+import postFileToAPI from './services'
 
 const initialState = {
   validFiles: [],
-  invalidFiles: []
+  invalidFiles: [],
+  succeededFiles: [],
+  unsucceededFiles: []
 }
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { status: '', ...initialState } ;
+    this.state = { ...initialState } ;
   }
 
   postValidFiles = () => {
-    if (this.state.invalidFiles.length === 0) {
-      postFilesToAPI(this.state.validFiles).then(() => {
-        this.setState({ status: 'Success!' });
-      }).catch((error) => {
-        this.setState({status: error.message});
-      });
-    } else {
-      const invalidFiles = this.state.invalidFiles.map((file) => `${file.name}`).join(', ');
-
-      this.setState({ status: `Invalid file(s): ${invalidFiles}.` });
-    }
+    return Promise.all(Array.from(this.state.validFiles).map(file => postFileToAPI(file).then(succeededFile => {
+      this.setState({ succeededFiles: [...this.state.succeededFiles, succeededFile]});
+    }).catch(error => {
+      if (error.isInvalid) {
+        this.setState({ invalidFiles: [...this.state.invalidFiles, error.file]});
+      } else {
+        this.setState({ unsucceededFiles: [...this.state.unsucceededFiles, error.file]});
+      }
+    })));
   }
 
   handleFile = file => {
@@ -65,6 +65,10 @@ class App extends Component {
     });
   }
 
+  formatFileStatus(prefix, files) {
+    return files.length === 0 ? null : <p>{prefix + files.map((file) => `${file.name}`).join(', ')}</p>
+  }
+
   render() {
     return (
       <div className='App'>
@@ -76,7 +80,9 @@ class App extends Component {
                 onChange={e => this.handleFilesChanged(e.target.files)}
                 multiple />
         <br />
-        <span>{this.state.status}</span>
+        {this.formatFileStatus('Succeeded file(s): ', this.state.succeededFiles)}
+        {this.formatFileStatus('Unsucceeded file(s): ', this.state.unsucceededFiles)}
+        {this.formatFileStatus('Invalid file(s): ', this.state.invalidFiles)}
       </div>
     );
   }

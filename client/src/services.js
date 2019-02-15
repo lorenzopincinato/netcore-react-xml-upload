@@ -1,33 +1,29 @@
 const apiUrl = 'http://localhost:5000/api'; 
  
-const postFilesToAPI = (files) => {   
+const postFileToAPI = (file) => {   
   return new Promise((resolve, reject) => {
     fetch(
-      apiUrl + '/xmlFiles', { 
+      apiUrl + '/files', { 
           method: 'POST',
           headers: new Headers({
           'Content-Type': 'application/json;'
         }),
-        body: JSON.stringify(files)
+        body: JSON.stringify(file)
     }).then(response => {
       if (response.ok) {
-        resolve(response);
+        resolve({...file});
       } else {
         if (response.status === 400) {
-          response.json().then(json => {
-            let invalidFiles = json.map(name => `${name}`).join(', ');
-            reject({message: `Invalid file(s): ${invalidFiles}.`})
-          });
+          reject({isInvalid: true, file: file})
         }
         else {
-          console.log(response);
-          reject({message: response.statusText});
+          reject({isInvalid: false, file: file});
         }
       }
-    }, error => {
-      reject(new Error(error.message));
+    }, () => {
+      reject({isInvalid: false, file: file});
     });
   });
 };
 
-export default postFilesToAPI;
+export default postFileToAPI;
